@@ -1,0 +1,19 @@
+# Python virtual environment
+.venv/
+venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# PyCharm
+.idea/
+
+# macOS
+.DS_Store
+
+# Real scan data
+scan_results.csv
+
+# Temporary files
+*.log
