@@ -17,3 +17,6 @@ scan_results.csv
 
 # Temporary files
 *.log
+
+# Visual Studio files
+.vs/
