@@ -1,354 +1,335 @@
-Python Network Port Scanner
+Network Port Scanner
 
-A command-line TCP port scanner written in Python for scanning systems in an authorized infrastructure lab.
+A modular Python TCP port scanner built as a hands-on networking, security, and software engineering portfolio project.
 
-The scanner validates a target IP address, checks a configurable list of common TCP ports, maps ports to likely services, records scan duration, and exports timestamped results to CSV.
+The scanner validates a target IP address, checks selected TCP ports, identifies common services, records scan results, and supports command-line options for repeatable lab use.
+
+Use this project only on systems and networks you own or have explicit authorization to test.
+
+Project Status
+
+Phase 2: Command-Line Interface and Testing
+
+Current progress: approximately 85% complete
+
+Completed
+
+IPv4 and IPv6 address validation
+
+TCP connection scanning
+
+Common service identification
+
+OPEN, CLOSED, TIMEOUT, and UNREACHABLE status handling
+
+Scan duration measurement
+
+CSV report generation
+
+Append and overwrite report modes
+
+Modular scanner package structure
+
+Command-line target selection
+
+Configurable connection timeout
+
+Timeout validation
+
+Custom comma-separated port selection
+
+Port number validation
+
+Automated unit tests
+
+Mocked socket tests
+
+Sanitized portfolio examples
+
+GitHub-ready project structure
+
+Remaining for Phase 2
+
+Replace the interactive CSV prompt with command-line options
+
+Add command-line output filename support
+
+Add overwrite or append flags
+
+Add parser-level tests
+
+Finalize CLI documentation
 
 Features
 
-Validates IPv4 and IPv6 addresses
+Validates IPv4 and IPv6 addresses before scanning
 
-Scans a configurable list of common TCP ports
+Scans a built-in list of common TCP services
 
-Displays likely service names
+Accepts custom TCP port lists
 
-Distinguishes between:
+Supports configurable connection timeouts
 
-OPEN
+Maps known ports to service names
 
-CLOSED
+Labels unrecognized ports as UNKNOWN
 
-TIMEOUT
+Displays results in the terminal
 
-UNREACHABLE
+Saves results to CSV
 
-Measures total scan duration
+Handles Ctrl+C cleanly
 
-Exports results to CSV
-
-Supports append and overwrite modes
-
-Handles Ctrl+C gracefully
-
-Uses only Python standard-library modules
-
-Example Output
-
-Target IP: 203.0.113.10
-
-Scanning Target: 203.0.113.10
-----------------------------------------
-[OPEN] 203.0.113.10:22 (SSH)
-[OPEN] 203.0.113.10:53 (DNS)
-[OPEN] 203.0.113.10:80 (HTTP)
-[OPEN] 203.0.113.10:443 (HTTPS)
-[TIMEOUT] 203.0.113.10:445 (SMB)
-[TIMEOUT] 203.0.113.10:3389 (RDP)
-
-Scan completed in 2.03 seconds.
-Append to existing CSV? (Y/N): N
-Results saved to scan_results.csv
-
-Screenshot
-
-
-
-Requirements
-
-Python 3.10 or newer
-
-No external packages required
+Uses Python's built-in testing framework
 
 Project Structure
 
 Network-Port-Scanner/
 ├── main.py
-├── README.md
-├── LICENSE
+├── scanner/
+│   ├── __init__.py
+│   ├── reporting.py
+│   ├── scanning.py
+│   ├── services.py
+│   └── validation.py
+├── tests/
+│   ├── test_arguments.py
+│   ├── test_scanning.py
+│   └── test_validation.py
 ├── .gitignore
-├── sample_scan_results.csv
-└── screenshots/
-    └── sample-scan-results.png
+├── LICENSE
+└── README.md
+
+Requirements
+
+Python 3.10 or newer
+
+No third-party packages required
 
 Installation
 
 Clone the repository:
 
-git clone https://github.com/jcain5/network-port-scanner.git
+git clone https://github.com/jcain5/Network-Port-Scanner.git
+cd Network-Port-Scanner
 
-Move into the project directory:
+Optional virtual environment:
 
-cd network-port-scanner
+Windows PowerShell
 
-Run the scanner:
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
-python3 main.py
+macOS or Linux
 
-On Windows, you may need to use:
-
-python main.py
+python3 -m venv .venv
+source .venv/bin/activate
 
 Usage
 
-When prompted, enter the IP address of a system you own or are explicitly authorized to scan.
+Display help:
 
-Target IP: 172.16.10.1
+python main.py --help
 
-The scanner checks each configured TCP port and displays the result.
+Scan the built-in service list:
 
-After the scan, choose whether to append the results to the existing CSV file or overwrite it.
+python main.py --target 192.0.2.10
 
-Append to existing CSV? (Y/N):
+Set a custom timeout:
 
-Enter Y to preserve previous scans and append new rows.
+python main.py --target 192.0.2.10 --timeout 0.5
 
-Enter N to replace the CSV with the latest scan.
+Scan selected ports:
+
+python main.py --target 192.0.2.10 --ports 22,80,443
+
+Combine custom ports and timeout:
+
+python main.py --target 192.0.2.10 --ports 22,53,80,443 --timeout 0.5
+
+Command-Line Options
+
+--target TARGET
+    Required target IPv4 or IPv6 address.
+
+--timeout TIMEOUT
+    Optional connection timeout in seconds.
+    Must be greater than 0 and no more than 60.
+    Default: 1.0
+
+--ports PORTS
+    Optional comma-separated list of TCP ports.
+    Each port must be between 1 and 65535.
+
+Example Output
+
+Scanning Target: 192.0.2.10
+----------------------------------------
+[TIMEOUT] 192.0.2.10: 22 (SSH)
+[OPEN] 192.0.2.10: 80 (HTTP)
+[TIMEOUT] 192.0.2.10: 443 (HTTPS)
+
+Scan completed in 1.04 seconds.
 
 CSV Output
 
-The scanner writes the following fields:
+The scanner stores results in scan_results.csv.
 
 timestamp,target,port,service,status
+2026-08-01T22:45:00,192.0.2.10,22,SSH,TIMEOUT
+2026-08-01T22:45:01,192.0.2.10,80,HTTP,OPEN
+2026-08-01T22:45:01,192.0.2.10,443,HTTPS,TIMEOUT
 
-Example:
+Real scan results should not be committed to a public repository. Keep scan_results.csv in .gitignore.
 
-timestamp,target,port,service,status
-2026-07-31 22:10:00,203.0.113.10,22,SSH,OPEN
-2026-07-31 22:10:00,203.0.113.10,53,DNS,OPEN
-2026-07-31 22:10:00,203.0.113.10,80,HTTP,OPEN
-2026-07-31 22:10:00,203.0.113.10,443,HTTPS,OPEN
-2026-07-31 22:10:00,203.0.113.10,445,SMB,TIMEOUT
+Running Tests
 
-The automatically generated scan_results.csv file is excluded from Git to prevent real infrastructure data from being published.
+Run the full test suite from the project root:
 
-A sanitized example is included as:
+python -m unittest discover -s tests
 
-sample_scan_results.csv
+Current expected result:
 
-Scanned Services
+Ran 20 tests
 
-The current version checks common TCP services such as:
+OK
 
-Port
+The exact count may increase as the project grows.
 
-Service
+Test Coverage
 
-21
+The suite checks:
 
-FTP
+Valid and invalid IP addresses
 
-22
+OPEN, CLOSED, TIMEOUT, and UNREACHABLE scan outcomes
 
-SSH
+Valid integer and decimal timeouts
 
-23
+Zero, negative, excessive, and non-numeric timeouts
 
-Telnet
+Valid custom port lists
 
-25
+Port lists containing spaces
 
-SMTP
+Single-port input
 
-53
+Non-numeric ports
 
-DNS over TCP
+Ports below and above the valid range
 
-80
-
-HTTP
-
-110
-
-POP3
-
-135
-
-Microsoft RPC
-
-139
-
-NetBIOS Session Service
-
-143
-
-IMAP
-
-389
-
-LDAP
-
-443
-
-HTTPS
-
-445
-
-SMB
-
-465
-
-SMTPS
-
-587
-
-SMTP Submission
-
-636
-
-LDAPS
-
-993
-
-IMAPS
-
-995
-
-POP3S
-
-1433
-
-Microsoft SQL Server
-
-2049
-
-NFS
-
-3306
-
-MySQL
-
-3389
-
-RDP
-
-5432
-
-PostgreSQL
-
-5900
-
-VNC
-
-5985
-
-WinRM HTTP
-
-5986
-
-WinRM HTTPS
-
-8006
-
-Proxmox
-
-8080
-
-Alternate HTTP
-
-8443
-
-Alternate HTTPS
-
-Status Meanings
-
-OPEN
-
-A TCP connection was successfully established.
-
-CLOSED
-
-The target actively refused the TCP connection.
-
-TIMEOUT
-
-The target did not respond before the configured timeout expired. This may indicate firewall filtering, packet dropping, or an unresponsive service.
-
-UNREACHABLE
-
-The operating system reported that the target or route could not be reached.
+Socket behavior is mocked where appropriate so unit tests do not depend on live services.
 
 Learning Objectives
 
-This project was created to practice:
+This project demonstrates:
 
-Python functions
+Python functions and type hints
 
-Type hints
+Modules and packages
 
-TCP socket programming
+TCP sockets
 
 Exception handling
 
 IP address validation
 
-Dictionaries and lists
+Command-line interfaces with argparse
 
-CSV file operations
+CSV file handling
 
-File append and overwrite modes
+Unit testing with unittest
 
-Runtime measurement
+Dependency mocking
 
-Program entry points
+Git and GitHub workflows
 
-Graceful interruption handling
+Responsible security-tool development
 
-Git and GitHub project packaging
+Roadmap
 
-Sanitizing infrastructure evidence for public documentation
+Phase 1: Core Scanner
 
-Current Limitations
+Single-host TCP scanning
 
-TCP scanning only
+Service mapping
 
-Scans one host at a time
+Status handling
 
-Uses a predefined port list
+CSV output
 
-Performs full TCP connection attempts
+Basic documentation
 
-Does not perform operating-system detection
+Phase 2: Modular CLI
 
-Does not perform service-version detection
-
-Does not perform vulnerability scanning
-
-Does not attempt authentication or exploitation
-
-Sequential scanning may be slow when many ports time out
-
-Planned Version 2.0 Features
-
-CIDR subnet input
-
-Multiple-host scanning
-
-Concurrent scanning with thread pools
-
-Hostname resolution
-
-Command-line arguments
-
-Configurable timeout values
-
-Custom port ranges
-
-Scan summaries
-
-Optional JSON export
-
-Sanitized reporting mode
+Package refactor
 
 Automated tests
 
-Security and Authorized Use
+--target
 
-This tool is intended only for systems and networks that you own or have explicit permission to test.
+--timeout
 
-Unauthorized port scanning may violate organizational policies, service agreements, or applicable law.
+--ports
 
-The project does not perform exploitation, credential attacks, vulnerability testing, or authentication attempts.
+Non-interactive report options
+
+Expanded CLI documentation
+
+Phase 3: Multi-Host Lab Scanning
+
+Planned:
+
+CIDR input
+
+Authorized subnet iteration
+
+Multi-host reporting
+
+Summary statistics
+
+Improved scan performance
+
+Scope controls
+
+Phase 4: Portfolio Polish
+
+Planned:
+
+Structured logging
+
+Additional report formats
+
+Improved terminal formatting
+
+Expanded test coverage
+
+Architecture diagram
+
+Release tagging
+
+Ethical Use
+
+This project is intended for:
+
+Personal home labs
+
+Authorized training environments
+
+Systems owned by the operator
+
+Networks where explicit testing permission has been granted
+
+Do not use this scanner against public systems, third-party networks, or infrastructure without authorization.
 
 License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Licensed under the MIT License. See LICENSE for details.
+
+Author
+
+Jeremy Cain
+
+Portfolio: https://www.jeremymcain.com
+
+GitHub: https://github.com/jcain5

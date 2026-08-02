@@ -1,7 +1,7 @@
 import unittest
 import argparse
 
-from main import positive_timeout
+from main import parse_ports, positive_timeout
 
 class TestPositiveTimeout(unittest.TestCase):
     def test_valid_integer(self) -> None:
@@ -31,6 +31,38 @@ class TestPositiveTimeout(unittest.TestCase):
         with self.assertRaises(argparse.ArgumentTypeError):
             positive_timeout("banana")
 
+
+class TestParsePorts(unittest.TestCase):
+
+    def test_valid_ports(self) -> None:
+        self.assertEqual(
+            parse_ports("22,80,443"),
+            [22, 80, 443],
+        )
+
+    def test_ports_with_spaces(self) -> None:
+        self.assertEqual(
+            parse_ports("22, 80, 443"),
+            [22, 80, 443],
+        )
+
+    def test_single_port(self) -> None:
+        self.assertEqual(
+            parse_ports("3389"),
+            [3389],
+        )
+
+    def test_non_numeric_port(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            parse_ports("22,banana,443")
+
+    def test_port_below_range(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            parse_ports("0,443")
+
+    def test_port_above_range(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            parse_ports("22,65536")
 
 if __name__ == "__main__":
     unittest.main()
