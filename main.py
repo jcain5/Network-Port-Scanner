@@ -67,6 +67,29 @@ def parse_arguments() -> argparse.Namespace:
         type=parse_ports,
         help="Comma separated TCP ports, for example: 22,80,443",
     )
+    parser.add_argument(
+        "--output",
+        default="scan_results.csv",
+        help="CSV output file name (default: scan_results.csv)",
+    )
+
+    file_mode_group = parser.add_mutually_exclusive_group()
+
+    file_mode_group.add_argument(
+        "--append",
+        dest="file_mode",
+        action="store_const",
+        const="a",
+        help="Append results to the output CSV",
+    )
+    file_mode_group.add_argument(
+        "--overwrite",
+        dest="file_mode",
+        action="store_const",
+        const="w",
+        help="Overwrite the output CSV",
+    )
+    parser.set_defaults(file_mode="a")
 
     return parser.parse_args()
 
@@ -95,11 +118,13 @@ def main() -> None:
     elapsed_time = time.perf_counter() - start_time
     print(f"\nScan completed in {elapsed_time:.2f} seconds.")
 
-    save_mode = input("Append to existing CSV? (Y/N): ").strip().lower()
-    mode = "a" if save_mode == "y" else "w"
+    save_results(
+        results,
+        filename=args.output,
+        mode=args.file_mode,
+    )
 
-    save_results(results, mode=mode)
-    print("Results saved to scan_results.csv")
+    print(f"Results saved to {args.output}")
 
 
 if __name__ == "__main__":

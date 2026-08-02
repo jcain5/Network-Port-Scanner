@@ -14,6 +14,7 @@ __pycache__/
 
 # Real scan data
 scan_results.csv
+*_scan.csv
 
 # Temporary files
 *.log

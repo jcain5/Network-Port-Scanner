@@ -5,6 +5,9 @@ def save_results(
     filename: str = "scan_results.csv",
     mode: str = "a",
 ) -> None:
+    if mode not in ("a", "w"):
+        raise ValueError("Mode must be 'a' or 'w'.")
+
     fieldnames = ["timestamp", "target", "port", "service", "status"]
 
     with open(filename, mode, newline="", encoding="utf-8") as csv_file:
