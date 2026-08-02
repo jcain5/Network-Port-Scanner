@@ -1,30 +1,3 @@
-writer.writerows(results)
-
-is this good sanitized data
-this
-what are the red play symbols
-how do i turn this off
-
-Run these now:
-
-git add main.py tests/test_arguments.py
-git commit -m "Add command-line parser tests"
-git push
-
-Then verify the repository state:
-
-git status
-
-Expected:
-
-On branch main
-Your branch is up to date with 'origin/main'.
-
-nothing to commit, working tree clean
-
-After that, Phase 2 has only the README refresh and final repository polish left. The code side is essentially complete.
-
-give me the updated readme in a copy and paste form 
 # Network Port Scanner
 
 A modular Python TCP port scanner built as a hands-on networking, security, and software engineering portfolio project.
