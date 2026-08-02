@@ -62,7 +62,7 @@ def parse_arguments(
         "--timeout",
         type=positive_timeout,
         default=1.0,
-        help="Connection timeout in seconds from 0 to 60 (default: 1.0)",
+        help="Connection timeout in seconds greater than 0 and up to 60",
     )
     parser.add_argument(
         "--ports",
