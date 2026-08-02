@@ -1,7 +1,7 @@
 import unittest
 import argparse
 
-from main import parse_ports, positive_timeout
+from main import parse_arguments, parse_ports, positive_timeout
 
 class TestPositiveTimeout(unittest.TestCase):
     def test_valid_integer(self) -> None:
@@ -64,5 +64,74 @@ class TestParsePorts(unittest.TestCase):
         with self.assertRaises(argparse.ArgumentTypeError):
             parse_ports("22,65536")
 
-if __name__ == "__main__":
-    unittest.main()
+
+class TestArgumentParser(unittest.TestCase):
+    def test_required_target(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+        ])
+
+        self.assertEqual(args.target, "192.0.2.10")
+
+
+    def test_default_timeout(self) -> None:
+        args = parse_arguments([
+            "--target",
+             "192.0.2.10",
+        ])
+
+        self.assertEqual(args.timeout, 1.0)
+
+
+    def test_default_output(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+        ])
+
+        self.assertEqual(args.output, "scan_results.csv")
+
+
+    def test_default_file_mode(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+        ])
+
+        self.assertEqual(args.file_mode, "a")
+
+
+    def test_custom_argumnets(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+            "--timeout",
+            "0.5",
+            "--ports",
+            "22,80,443",
+            "--output",
+            "sample.csv",
+            "--overwrite",
+        ])
+
+        self.assertEqual(args.target, "192.0.2.10")
+        self.assertEqual(args.timeout, 0.5)
+        self.assertEqual(args.ports, [22, 80, 443])
+        self.assertEqual(args.output, "sample.csv")
+        self.assertEqual(args.file_mode, "w")
+
+
+    def test_conflicting_file_mode(self) -> None:
+        with self.assertRaises(SystemExit):
+            parse_arguments([
+            "--target",
+            "192.0.2.10",
+            "--append",
+            "--overwrite",
+            ])
+
+
+    def test_missing_target(self) -> None:
+        with self.assertRaises(SystemExit):
+            parse_arguments([])

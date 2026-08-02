@@ -46,7 +46,9 @@ def parse_ports(value: str) -> list[int]:
     return ports
 
 
-def parse_arguments() -> argparse.Namespace:
+def parse_arguments(
+        arguments: list[str] | None = None,
+) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Scan common TCP ports on an authorized target."
     )
@@ -91,7 +93,7 @@ def parse_arguments() -> argparse.Namespace:
     )
     parser.set_defaults(file_mode="a")
 
-    return parser.parse_args()
+    return parser.parse_args(arguments)
 
 
 def main() -> None:
