@@ -4,7 +4,7 @@ from scanner.validation import validate_ip
 class TestValidateIP(unittest.TestCase):
 
 
-    def test_valid_ipv4_address(self) -> None:
+    def test_valid_loopback_address(self) -> None:
         self.assertTrue(validate_ip("127.0.0.1"))
 
 

@@ -102,7 +102,7 @@ class TestArgumentParser(unittest.TestCase):
         self.assertEqual(args.file_mode, "a")
 
 
-    def test_custom_argumnets(self) -> None:
+    def test_custom_arguments(self) -> None:
         args = parse_arguments([
             "--target",
             "192.0.2.10",
