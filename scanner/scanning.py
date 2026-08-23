@@ -29,5 +29,5 @@ def scan_host(target: str, services: dict[int, str], timeout: float = 1.0) -> li
             "status": status,
         })
 
-        print(f"[{status}] {target}: {port} ({service})")
+
     return results

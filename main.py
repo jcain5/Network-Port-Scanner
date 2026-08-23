@@ -155,6 +155,14 @@ def main() -> None:
         for future in futures:
             all_results.extend(future.result())
 
+    for result in all_results:
+        print(
+            f"[{result['status']}] "
+            f"{result['target']}: "
+            f"{result['port']} "
+            f"({result['service']}) "
+        )
+
     elapsed_time = time.perf_counter() - start_time
     print(f"\nScanning completed in {elapsed_time:.2f} seconds.")
 
