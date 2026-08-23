@@ -1,7 +1,7 @@
 import argparse
 import time
+from concurrent.futures import ThreadPoolExecutor
 
-from scanner.validation import validate_ip
 from scanner.scanning import scan_host
 from scanner.services import SERVICES
 from scanner.reporting import save_results
@@ -25,6 +25,26 @@ def positive_timeout(value: str) -> float:
         )
 
     return timeout
+
+
+def positive_workers(value: str) -> int:
+    try:
+        workers = int(value)
+    except ValueError:
+        raise argparse.ArgumentTypeError(
+            "Workers must be an integer"
+        )
+    if workers < 1:
+        raise argparse.ArgumentTypeError(
+            "Workers must be at least 1"
+        )
+    if workers > 32:
+        raise argparse.ArgumentTypeError(
+            "Workers must be 32 or less"
+        )
+
+    return workers
+
 
 def parse_ports(value: str) -> list[int]:
     ports = []
@@ -75,6 +95,12 @@ def parse_arguments(
         default="scan_results.csv",
         help="CSV output file name (default: scan_results.csv)",
     )
+    parser.add_argument(
+        "--workers",
+        type=positive_workers,
+        default=8,
+        help="Number of concurrent host workers(default: 8)",
+    )
 
     file_mode_group = parser.add_mutually_exclusive_group()
 
@@ -111,17 +137,23 @@ def main() -> None:
     all_results = []
     start_time = time.perf_counter()
 
-    for target in targets:
-        print(f"\nScanning target: {target}")
-        print("-" * 40)
+    with ThreadPoolExecutor(max_workers = args.workers) as executor:
+        futures = []
 
-        results = scan_host(
-            target,
-            services,
-            timeout = args.timeout
-        )
+        for target in targets:
+            print(f"\nScanning target: {target}")
+            print("-" * 40)
 
-        all_results.extend(results)
+            future = executor.submit(
+                scan_host,
+                target,
+                services,
+                timeout = args.timeout
+            )
+
+            futures.append(future)
+        for future in futures:
+            all_results.extend(future.result())
 
     elapsed_time = time.perf_counter() - start_time
     print(f"\nScanning completed in {elapsed_time:.2f} seconds.")

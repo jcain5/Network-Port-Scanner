@@ -1,7 +1,7 @@
 import unittest
 import argparse
 
-from main import parse_arguments, parse_ports, positive_timeout
+from main import parse_arguments, parse_ports, positive_timeout, positive_workers
 
 class TestPositiveTimeout(unittest.TestCase):
     def test_valid_integer(self) -> None:
@@ -30,6 +30,26 @@ class TestPositiveTimeout(unittest.TestCase):
     def test_non_numeric_timeout(self) -> None:
         with self.assertRaises(argparse.ArgumentTypeError):
             positive_timeout("banana")
+
+class TestPositiveWorkers(unittest.TestCase):
+    def test_valid_integer(self) -> None:
+        self.assertEqual(positive_workers("8"),8)
+
+    def test_zero_workers(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            positive_workers("0")
+
+    def test_negative_workers(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            positive_workers("-1")
+
+    def test_workers_above_maximum(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            positive_workers("33")
+
+    def test_non_numeric_workers(self) -> None:
+        with self.assertRaises(argparse.ArgumentTypeError):
+            positive_workers("eight")
 
 
 class TestParsePorts(unittest.TestCase):
@@ -135,3 +155,22 @@ class TestArgumentParser(unittest.TestCase):
     def test_missing_target(self) -> None:
         with self.assertRaises(SystemExit):
             parse_arguments([])
+
+
+    def test_default_workers(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+        ])
+        self.assertEqual(args.workers, 8)
+
+
+    def test_custom_workers(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+            "--workers",
+            "4",
+        ])
+
+        self.assertEqual(args.workers, 4)

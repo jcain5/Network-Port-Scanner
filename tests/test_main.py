@@ -21,7 +21,8 @@ class TestMain(unittest.TestCase):
             timeout = 0.5,
             ports = [80,443],
             output = "test.csv",
-            file_mode = "w"
+            file_mode = "w",
+            workers = 8,
         )
 
         mock_expand_targets.return_value =[
@@ -89,6 +90,7 @@ class TestMain(unittest.TestCase):
             ports=[80, 443],
             output="test.csv",
             file_mode="w",
+            workers=8,
         )
 
         mock_expand_targets.return_value = [
@@ -135,3 +137,32 @@ class TestMain(unittest.TestCase):
             filename = "test.csv",
             mode = "w",
         )
+    @patch("main.save_results")
+    @patch("main.ThreadPoolExecutor")
+    @patch("main.expand_targets")
+    @patch("main.parse_arguments")
+    def test_uses_eight_worker_threads(
+            self,
+            mock_parse_arguments,
+            mock_expand_targets,
+            mock_executor,
+            mock_save_results,
+    ) -> None:
+        mock_parse_arguments.return_value = Namespace(
+            target="192.168.1.1",
+            timeout=0.5,
+            ports=[80],
+            output="test.csv",
+            file_mode="w",
+            workers=8,
+        )
+        mock_expand_targets.return_value = [
+            "192.168.1.1",
+        ]
+        mock_pool = mock_executor.return_value.__enter__.return_value
+        mock_future = mock_pool.submit.return_value
+        mock_future.result.return_value = []
+
+        main.main()
+
+        mock_executor.assert_called_once_with(max_workers=8)
