@@ -5,6 +5,7 @@ from scanner.validation import validate_ip
 from scanner.scanning import scan_host
 from scanner.services import SERVICES
 from scanner.reporting import save_results
+from scanner.targets import expand_targets
 
 def positive_timeout(value: str) -> float:
     try:
@@ -98,7 +99,7 @@ def parse_arguments(
 
 def main() -> None:
     args = parse_arguments()
-    target = args.target.strip()
+    targets = expand_targets(args.target.strip())
     services = SERVICES
 
     if args.ports:
@@ -107,23 +108,28 @@ def main() -> None:
             for port in args.ports
         }
 
-    if not validate_ip(target):
-        print("Invalid IP Address")
-        return
-
-    print(f"\nScanning Target: {target}")
-    print("-" * 40)
-
+    all_results = []
     start_time = time.perf_counter()
-    results = scan_host(target, services, timeout=args.timeout)
+
+    for target in targets:
+        print(f"\nScanning target: {target}")
+        print("-" * 40)
+
+        results = scan_host(
+            target,
+            services,
+            timeout = args.timeout
+        )
+
+        all_results.extend(results)
 
     elapsed_time = time.perf_counter() - start_time
-    print(f"\nScan completed in {elapsed_time:.2f} seconds.")
+    print(f"\nScanning completed in {elapsed_time:.2f} seconds.")
 
     save_results(
-        results,
-        filename=args.output,
-        mode=args.file_mode,
+        all_results,
+        filename = args.output,
+         mode = args.file_mode,
     )
 
     print(f"Results saved to {args.output}")
