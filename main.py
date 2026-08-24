@@ -102,6 +102,13 @@ def parse_arguments(
         help="Number of concurrent host workers(default: 8)",
     )
 
+    parser.add_argument(
+        "--protocol",
+        choices=["tcp", "udp"],
+        default="tcp",
+        help="Transport protocol to scan: tcp or udp(default: tcp)",
+    )
+
     file_mode_group = parser.add_mutually_exclusive_group()
 
     file_mode_group.add_argument(
@@ -148,7 +155,8 @@ def main() -> None:
                 scan_host,
                 target,
                 services,
-                timeout = args.timeout
+                timeout = args.timeout,
+                protocol=args.protocol,
             )
 
             futures.append(future)

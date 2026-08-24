@@ -23,6 +23,7 @@ class TestMain(unittest.TestCase):
             output = "test.csv",
             file_mode = "w",
             workers = 8,
+            protocol = "tcp",
         )
 
         mock_expand_targets.return_value =[
@@ -61,6 +62,7 @@ class TestMain(unittest.TestCase):
                  443: "HTTPS",
              },
              timeout = 0.5,
+             protocol = "tcp",
          ),
          call (
              "192.168.1.2",
@@ -69,6 +71,7 @@ class TestMain(unittest.TestCase):
                  443: "HTTPS",
              },
              timeout = 0.5,
+             protocol = "tcp",
          ),
     ],
         )
@@ -91,6 +94,7 @@ class TestMain(unittest.TestCase):
             output="test.csv",
             file_mode="w",
             workers=8,
+            protocol="tcp",
         )
 
         mock_expand_targets.return_value = [
@@ -155,6 +159,7 @@ class TestMain(unittest.TestCase):
             output="test.csv",
             file_mode="w",
             workers=8,
+            protocol="tcp",
         )
         mock_expand_targets.return_value = [
             "192.168.1.1",

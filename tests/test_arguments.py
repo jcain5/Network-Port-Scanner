@@ -174,3 +174,23 @@ class TestArgumentParser(unittest.TestCase):
         ])
 
         self.assertEqual(args.workers, 4)
+
+
+    def test_default_protocol(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+        ])
+
+        self.assertEqual(args.protocol, "tcp")
+
+
+    def test_udp_protocol(self) -> None:
+        args = parse_arguments([
+            "--target",
+            "192.0.2.10",
+            "--protocol",
+            "udp"
+        ])
+
+        self.assertEqual(args.protocol, "udp")
