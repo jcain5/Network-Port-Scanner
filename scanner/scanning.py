@@ -45,10 +45,12 @@ def scan_udp_port(
             socket.SOCK_DGRAM,
     ) as sock:
         sock.settimeout(timeout)
-
+        payload = b""
+        if port == 53:
+            payload = build_dns_query("example.com")
         try:
             sock.sendto(
-                b"",
+                payload,
                 (target, port),
             )
 

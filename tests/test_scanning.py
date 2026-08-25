@@ -119,6 +119,27 @@ class TestScanUDPPort(unittest.TestCase):
             "OPEN",
         )
 
+    @patch("scanner.scanning.socket.socket")
+    def test_udp_uses_dns_payload(self, mock_socket) -> None:
+        mock_sock = mock_socket.return_value.__enter__.return_value
+
+        mock_sock.recvfrom.return_value = (
+            b"dns-response",
+            ("192.0.2.10", 53),
+        )
+
+        result = scan_udp_port(
+            "192.0.2.10",
+            53,
+            timeout=0.5,
+        )
+
+        expected_payload = build_dns_query("example.com")
+
+        mock_sock.sendto.assert_called_with(
+            expected_payload,
+            ("192.0.2.10", 53),
+        )
 
 class TestDnsHelpers(unittest.TestCase):
     def test_encode_dns_name(self) -> None:
