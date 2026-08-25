@@ -2,7 +2,7 @@ import socket
 import unittest
 from unittest.mock import patch
 
-from scanner.scanning import scan_port, scan_udp_port, scan_host, encode_dns_name, build_dns_query
+from scanner.scanning import scan_port, scan_udp_port, scan_host, encode_dns_name, build_dns_query, summarize_results
 
 
 class TestScanPort(unittest.TestCase):
@@ -162,6 +162,25 @@ class TestDnsHelpers(unittest.TestCase):
 
         self.assertTrue(result.endswith(b"\x00\x01\x00\x01"))
 
+class TestSummarizeResults(unittest.TestCase):
+    def test_counts_statuses(self) -> None:
+        results = [
+            {"status": "OPEN"},
+            {"status": "OPEN"},
+            {"status": "CLOSED"},
+            {"status": "TIMEOUT"},
+        ]
+
+        summary = summarize_results(results)
+
+        self.assertEqual(
+            summary,
+            {
+                "OPEN": 2,
+                "CLOSED": 1,
+                "TIMEOUT": 1,
+            }
+        )
 
 if __name__ == "__main__":
     unittest.main()

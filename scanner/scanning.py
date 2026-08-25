@@ -106,3 +106,17 @@ def build_dns_query(domain: str)-> bytes:
     )
 
     return header + question_name + question_tail
+
+
+def summarize_results(results: list[dict]) -> dict[str, int]:
+    summary = {}
+
+    for result in results:
+        status = result["status"]
+
+        if status not in summary:
+            summary[status] = 0
+
+        summary[status] += 1
+
+    return summary

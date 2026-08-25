@@ -2,7 +2,7 @@ import argparse
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from scanner.scanning import scan_host
+from scanner.scanning import scan_host, summarize_results
 from scanner.services import SERVICES
 from scanner.reporting import save_results
 from scanner.targets import expand_targets
@@ -171,7 +171,23 @@ def main() -> None:
             f"({result['service']}) "
         )
 
+    summary = summarize_results(all_results)
+
+    print("\nScan Summary")
+    print("=" * 40)
+    print(
+        f"Hosts scanned: "
+        f"{len({result['target'] for result in all_results})}"
+    )
+    print(f"Ports scanned: {len(all_results)}")
+    print(f"Open: {summary.get('OPEN', 0)}")
+    print(f"Timeout: {summary.get('TIMEOUT', 0)}")
+    print(f"Open|Filtered: {summary.get('OPEN|FILTERED', 0)}")
+    print(f"Closed: {summary.get('CLOSED', 0)}")
+    print(f"Unreachable: {summary.get('UNREACHABLE', 0)}")
+
     elapsed_time = time.perf_counter() - start_time
+
     print(f"\nScanning completed in {elapsed_time:.2f} seconds.")
 
     save_results(
