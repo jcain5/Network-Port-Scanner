@@ -1,65 +1,189 @@
-Network Port Scanner
+# Network Port Scanner
 
-A modular Python TCP port scanner built as a hands-on networking, security, and software engineering portfolio project.
+A Python-based network port scanner built as a hands-on learning project for networking, Python, testing, concurrency, reporting, and protocol-aware scanning.
 
-The scanner supports single-host and authorized CIDR network scanning, common or user-selected TCP ports, service mapping, connection-status classification, configurable concurrent host scanning, and CSV reporting.
+> Use this tool only on systems and networks you own or are explicitly authorized to test.
 
-Use this project only on systems and networks you own or have explicit authorization to test.
+## Current Status
 
-Project Status
+Completed:
+- Phase 1: Core TCP scanner
+- Phase 2: Modular CLI scanner
+- Phase 3: Multi-host and CIDR scanning with concurrency
+- Phase 3B: UDP scanning and DNS-aware probing
+- Phase 4A: Scan summary reporting
 
-Phase 3 Complete: Concurrent Multi-Host Lab Scanner
+In progress:
+- Phase 4B: Filtering and grouping scan results
 
-The project has progressed from a single-file learning script into a tested, modular command-line application capable of scanning individual hosts or authorized IPv4 CIDR ranges with scope controls and configurable concurrency.
+Automated tests: **56 passing**
 
-Completed Capabilities
+## Features
 
-IPv4 and IPv6 address validation
+### TCP Scanning
 
-Single-host TCP scanning
+Supports common TCP services and statuses such as:
+- `OPEN`
+- `CLOSED`
+- `TIMEOUT`
+- `UNREACHABLE`
 
-IPv4 CIDR target expansion
+Example:
 
-Authorized multi-host subnet scanning
+```bash
+python3 main.py --target 192.168.1.254 --protocol tcp --ports 22,53,80,443 --timeout 1 --workers 1 --overwrite
+```
 
-Maximum scope of 256 usable hosts per CIDR scan
+### UDP Scanning
 
-Common service identification
+Supports:
+- `OPEN`
+- `OPEN|FILTERED`
+- `CLOSED`
+- `UNREACHABLE`
 
-OPEN, CLOSED, TIMEOUT, and UNREACHABLE handling
+Example:
 
-Configurable connection timeout
+```bash
+python3 main.py --target 192.168.1.254 --protocol udp --ports 53 --timeout 1 --workers 1 --overwrite
+```
 
-Custom comma-separated TCP port selection
+## DNS-Aware UDP Probing
 
-Configurable concurrent host workers
+UDP port 53 sends a valid DNS query instead of an empty UDP payload.
 
-Worker validation from 1 through 32
+The scanner builds a DNS query for:
 
-Ordered post-scan terminal output
+```text
+example.com
+```
 
-Scan duration measurement
+Example result:
 
-CSV report generation
+```text
+[OPEN] 192.168.1.254: 53/UDP(DNS)
+```
 
-Append and overwrite report modes
+Authorized `/24` validation successfully identified multiple hosts responding to DNS queries.
 
-Custom output filenames
+## CIDR and Multi-Host Scanning
 
-Modular scanner package
+Supports:
+- Single IPv4 addresses
+- Single IPv6 addresses
+- IPv4 CIDR ranges
+- `/31`
+- `/32`
 
-Automated unit and integration-style tests
+Example:
 
-Mocked socket and multi-host tests
+```bash
+python3 main.py --target 192.168.1.0/24 --workers 32
+```
 
-Command-line parser tests
+CIDR expansion is limited to **256 usable hosts**.
 
-Sanitized documentation examples
+## Concurrent Host Scanning
 
-Standard-library-only implementation
+The scanner uses Python's `ThreadPoolExecutor`.
 
-Project Structure
+Worker limits:
+- Minimum: 1
+- Maximum: 32
+- Default: 8
 
+Important: workers currently parallelize **hosts**, not ports.
+
+Observed authorized-lab performance included:
+- `/28` sequential-style scan: about 21 seconds
+- `/28` with 4 workers: about 6 seconds
+- `/28` with 8 workers: about 3 seconds
+- `/24` with 32 workers: about 12 seconds
+- `/24` UDP DNS scan: about 8 seconds
+
+## Scan Summary
+
+Phase 4A adds a summary after each scan.
+
+Example:
+
+```text
+Scan Summary
+========================================
+Hosts scanned: 1
+Ports scanned: 4
+Open: 3
+Timeout: 1
+Open|Filtered: 0
+Closed: 0
+Unreachable: 0
+```
+
+The summary reports:
+- Hosts scanned
+- Ports scanned
+- Open
+- Timeout
+- Open|Filtered
+- Closed
+- Unreachable
+
+## CSV Reporting
+
+Current CSV columns:
+
+```text
+timestamp,target,port,protocol,service,status
+```
+
+Example:
+
+```text
+2026-08-24 21:04:58,192.168.1.254,53,udp,DNS,OPEN
+```
+
+## Output Modes
+
+Append:
+
+```bash
+--append
+```
+
+Overwrite:
+
+```bash
+--overwrite
+```
+
+## Custom Ports
+
+Example:
+
+```bash
+python3 main.py --target 192.168.1.254 --protocol tcp --ports 22,53,80,443 --timeout 1 --overwrite
+```
+
+If `--ports` is omitted, the scanner uses all services currently defined in `scanner/services.py`.
+
+This does **not** currently mean all 65,535 ports.
+
+## Command-Line Options
+
+```text
+--target       Required IP address or CIDR target
+--timeout      Socket timeout
+--ports        Comma-separated port list
+--output       CSV output filename
+--workers      Concurrent host workers
+--protocol     tcp or udp
+--append       Append CSV output
+--overwrite    Overwrite CSV output
+```
+
+## Project Structure
+
+```text
 Network-Port-Scanner/
 ├── main.py
 ├── scanner/
@@ -69,464 +193,191 @@ Network-Port-Scanner/
 │   ├── services.py
 │   ├── targets.py
 │   └── validation.py
-├── tests/
-│   ├── test_arguments.py
-│   ├── test_main.py
-│   ├── test_scanning.py
-│   ├── test_targets.py
-│   └── test_validation.py
-├── .gitignore
-├── LICENSE
-└── README.md
+└── tests/
+    ├── __init__.py
+    ├── test_arguments.py
+    ├── test_main.py
+    ├── test_scanning.py
+    ├── test_targets.py
+    └── test_validation.py
+```
 
-Requirements
+Refactoring is planned later and is intentionally not blocking feature development.
 
-Python 3.10 or newer
+## Testing
 
-No third-party packages required
+macOS/Linux:
 
-Installation
-
-git clone https://github.com/jcain5/Network-Port-Scanner.git
-cd Network-Port-Scanner
-
-Optional virtual environment:
-
-Windows PowerShell
-
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-
-macOS or Linux
-
-python3 -m venv .venv
-source .venv/bin/activate
-
-Usage
-
-Help
-
-py main.py --help
-
-Scan a single host
-
-py main.py --target 192.0.2.10
-
-Scan selected ports
-
-py main.py --target 192.0.2.10 --ports 22,80,443
-
-Use a custom timeout
-
-py main.py --target 192.0.2.10 --timeout 0.5
-
-Scan an authorized CIDR range
-
-py main.py --target 192.0.2.0/28 --ports 53,80,443
-
-Configure host workers
-
-py main.py --target 192.0.2.0/28 --ports 53,80,443 --timeout 0.5 --workers 8
-
-Overwrite a report
-
-py main.py --target 192.0.2.10 --ports 22,80,443 --output sample_scan.csv --overwrite
-
-Append to a report
-
-py main.py --target 192.0.2.10 --ports 22,80,443 --output sample_scan.csv --append
-
-The addresses 192.0.2.0/24, 198.51.100.0/24, and 203.0.113.0/24 are reserved for documentation and examples.
-
-Command-Line Options
-
---target TARGET
-
-Required IPv4 address, IPv6 address, or supported IPv4 CIDR range.
-
---timeout TIMEOUT
-
-Connection timeout in seconds.
-
-Greater than 0
-
-Maximum 60 seconds
-
-Default: 1.0
-
---ports PORTS
-
-Comma-separated TCP ports. Each port must be between 1 and 65535.
-
---output OUTPUT
-
-CSV output filename.
-
-Default: scan_results.csv
-
---workers WORKERS
-
-Concurrent host workers.
-
-Minimum: 1
-
-Maximum: 32
-
-Default: 8
-
---append
-
-Append scan results to the output CSV.
-
---overwrite
-
-Replace the output CSV with the latest scan.
-
---append and --overwrite are mutually exclusive.
-
-Example Output
-
-Scanning target: 192.0.2.1
-----------------------------------------
-
-Scanning target: 192.0.2.2
-----------------------------------------
-[TIMEOUT] 192.0.2.1: 53 (DNS)
-[OPEN] 192.0.2.1: 80 (HTTP)
-[TIMEOUT] 192.0.2.1: 443 (HTTPS)
-[TIMEOUT] 192.0.2.2: 53 (DNS)
-[TIMEOUT] 192.0.2.2: 80 (HTTP)
-[TIMEOUT] 192.0.2.2: 443 (HTTPS)
-
-Scanning completed in 1.53 seconds.
-Results saved to scan_results.csv
-
-Scan Statuses
-
-Status
-
-Meaning
-
-OPEN
-
-A TCP connection was successfully established
-
-CLOSED
-
-The target actively refused the connection
-
-TIMEOUT
-
-The target did not respond before the timeout expired
-
-UNREACHABLE
-
-The host or network could not be reached
-
-A timeout does not prove that a port is open or closed. It may indicate firewall filtering, packet loss, routing problems, or a non-responsive host.
-
-CIDR Scope Controls
-
-CIDR scanning is intentionally constrained for responsible lab use.
-
-The scanner:
-
-Expands supported IPv4 CIDR ranges into usable host addresses
-
-Handles /31 and /32 networks
-
-Rejects CIDR ranges containing more than 256 usable hosts
-
-Concurrency
-
-Phase 3 introduced host-level concurrency using Python's ThreadPoolExecutor.
-
-Each worker scans one host while that host's selected ports are checked sequentially. Worker count is controlled with --workers.
-
-Worker results are collected before they are printed, keeping terminal output ordered rather than allowing multiple threads to print simultaneously.
-
-Performance Evidence
-
-Measured during authorized local-lab testing:
-
-Scenario
-
-Scan Time
-
-/28, sequential baseline
-
-21.30 s
-
-/28, 4 workers
-
-6.17 s
-
-/28, 8 workers
-
-3.04 s
-
-/24, 32 workers
-
-12.31 s
-
-The /28 tests used 14 usable hosts, three TCP ports per host, and a 0.5 second timeout.
-
-The /24 test exercised 254 usable hosts and three TCP ports per host with 32 workers.
-
-CSV Output
-
-Default output:
-
-scan_results.csv
-
-Example:
-
-timestamp,target,port,service,status
-2026-08-23 18:00:00,192.0.2.1,53,DNS,TIMEOUT
-2026-08-23 18:00:00,192.0.2.1,80,HTTP,OPEN
-2026-08-23 18:00:00,192.0.2.1,443,HTTPS,TIMEOUT
-
-Real scan results should not be committed to a public repository. Local scan reports such as scan_results.csv and *_scan.csv should remain excluded by .gitignore.
-
-Running Tests
-
-Windows
-
-py -m unittest discover -v
-
-macOS or Linux
-
+```bash
 python3 -m unittest discover -v
+```
+
+Windows:
+
+```powershell
+py -m unittest discover -v
+```
 
 Current result:
 
-Ran 45 tests
+```text
+Ran 56 tests
 
 OK
-
-Some parser tests intentionally print command-line errors before the final OK. Those tests verify invalid argument combinations are rejected.
-
-Test Coverage
-
-The automated suite covers:
-
-IPv4 and IPv6 validation
-
-Invalid address handling
-
-Single-target expansion
-
-IPv4 CIDR expansion
-
-/31 and /32 handling
-
-CIDR host-limit enforcement
-
-OPEN, CLOSED, TIMEOUT, and UNREACHABLE
-
-Mocked socket behavior
-
-Timeout validation
-
-Port-list validation
-
-Worker-count validation
-
-Required CLI arguments
-
-Default and custom worker values
-
-Append/overwrite conflicts
-
-Multi-host scan submission
-
-Combined multi-host results
-
-Thread-pool worker configuration
-
-Learning Objectives
-
-This project demonstrates practical experience with:
-
-Python functions and type hints
-
-Modules and packages
-
-TCP sockets
-
-Exception handling
-
-ipaddress
-
-argparse
-
-CSV file handling
-
-unittest
-
-Dependency mocking
-
-Input validation
-
-ThreadPoolExecutor
-
-Concurrent host-level workloads
-
-Performance measurement
-
-Scope controls
-
-Git and GitHub workflows
-
-Responsible security-tool development
-
-Development Roadmap
-
-Phase 1: Core Scanner
-
-Completed:
-
-Single-host TCP scanning
-
-Common service mapping
-
-Status handling
-
-CSV output
-
-Basic documentation
-
-Phase 2: Modular Command-Line Application
-
-Completed:
-
-Package refactor
-
-Automated tests
-
---target
-
---timeout
-
---ports
-
---output
-
---append
-
---overwrite
-
-Parser-level tests
-
-Non-interactive execution
-
-Phase 3: Multi-Host Lab Scanning
-
-Completed:
-
-CIDR input
-
-Authorized subnet iteration
-
-Multi-host result collection
-
-Scope controls
-
-Concurrent host scanning
-
-Configurable worker count
-
-Worker-count validation
-
-Ordered post-scan output
-
-Performance measurement
-
-Expanded automated testing
-
-Phase 4: Data Visualization and Reporting
+```
+
+Tests cover:
+- Argument parsing
+- Timeout validation
+- Worker validation
+- Port parsing
+- TCP status handling
+- UDP status handling
+- DNS name encoding
+- DNS query packet construction
+- DNS payload use on UDP/53
+- TCP/UDP routing
+- CIDR expansion
+- `/31`
+- `/32`
+- Host limits
+- IPv4 validation
+- IPv6 validation
+- Main application flow
+- Thread pool configuration
+- Combined result handling
+- Scan status summaries
+
+## Development Roadmap
+
+### Phase 1 - Core Scanner
+Completed.
+
+### Phase 2 - Modular CLI Scanner
+Completed.
+
+### Phase 3 - Multi-Host Scanning
+Completed.
+
+### Phase 3B - UDP Support
+Completed.
+
+Includes:
+- UDP sockets
+- UDP-specific statuses
+- Protocol selection
+- DNS query packet construction
+- DNS-aware UDP/53 probing
+- Protocol-aware reporting
+
+### Phase 4A - Scan Summary
+Completed.
+
+Includes:
+- Host counts
+- Port counts
+- Status counts
+
+### Phase 4B - Filtering and Grouping
+Next.
 
 Planned:
+- Show only open results
+- Group results by host
+- Improve readability for larger scans
 
-Scan summaries
+### Phase 4C - Historical Comparison
+Planned.
 
-Host and service summaries
+Possible goals:
+- Compare current and previous scans
+- Identify newly opened ports
+- Identify closed or disappeared services
+- Highlight meaningful changes
 
-Summary charts
+### Phase 4D - Visualization
+Planned.
 
-Host-to-service visualizations
+Possible goals:
+- Status distribution charts
+- Open ports by host
+- Scan trend visualization
 
-Historical scan comparisons
+### Phase 4E - Dashboard
+Planned.
 
-Baseline deviation displays
+### Phase 5 - AI-Assisted Analysis
+Future enhancement.
 
-Dashboard-style reporting
+Possible goals:
+- Summarize findings
+- Explain important changes
+- Highlight results that deserve investigation
+- Generate human-readable analysis from authorized scan data
 
-Phase 5: AI-Assisted Interpretation
+## Design Decisions
 
-Planned:
+### Why `OPEN|FILTERED` Exists
 
-Plain-English scan summaries
+UDP is connectionless. If a datagram receives no response, the scanner cannot always determine whether the port is open but silent or filtered by a firewall.
 
-Baseline deviation analysis
+### Why DNS Gets a Special Probe
 
-Unusual service-pattern detection
+An empty UDP payload often receives no response. DNS has a defined request format, so UDP/53 sends a valid DNS query.
 
-Host role comparisons
+### Why Concurrency Is Limited
 
-Risk and attention scoring
+The scanner limits worker count to 32 and CIDR expansion to 256 usable hosts to keep scans controlled and suitable for authorized lab use.
 
-AI-assisted report explanations
+## Requirements
 
-The AI layer will interpret scanner data rather than replace the scanner's deterministic network logic.
+Python 3.
 
-Ethical Use
+The project currently uses only the Python standard library for its core functionality.
+
+## Safety and Authorization
 
 This project is intended for:
+- Home labs
+- Personally owned systems
+- Training environments
+- Networks where explicit authorization has been granted
 
-Personal home labs
+Do not scan systems or networks without permission.
 
-Authorized training environments
+## Learning Goals
 
-Systems owned by the operator
+This project develops practical experience with:
+- Python functions and modules
+- Type hints
+- Exceptions
+- Socket programming
+- TCP and UDP behavior
+- DNS packet structure
+- Binary data
+- `struct.pack`
+- CLI design
+- Input validation
+- CIDR addressing
+- Concurrency
+- `ThreadPoolExecutor`
+- CSV reporting
+- Unit testing
+- Mocking
+- Context managers
+- Result analysis
+- Incremental software development
+- Git-based development workflow
 
-Networks where explicit testing permission has been granted
+## Current Milestone
 
-Do not use this scanner against public systems, third-party networks, or infrastructure without authorization.
+```text
+56 automated tests passing
+TCP + UDP scanning operational
+DNS-aware UDP probing operational
+CIDR and concurrent host scanning operational
+Protocol-aware console and CSV reporting operational
+Scan summary operational
+```
 
-Limitations
-
-This project performs TCP connect scans against individual hosts or authorized IPv4 CIDR ranges within its scope limit.
-
-It does not currently include:
-
-UDP scanning
-
-Operating-system detection
-
-Service-version detection
-
-Vulnerability exploitation
-
-Stealth scanning
-
-Authentication testing
-
-Internet-wide scanning
-
-ICMP or ARP host discovery
-
-Vulnerability scoring
-
-This is an educational and defensive lab tool, not a replacement for mature tools such as Nmap.
-
-License
-
-This project is licensed under the MIT License. See LICENSE for details.
-
-Author
-
-Jeremy Cain
-
-Portfolio: https://www.jeremymcain.com
-GitHub: https://github.com/jcain5
+Next development step: **Phase 4B: filtering results to show only open findings**.
