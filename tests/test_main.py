@@ -36,6 +36,7 @@ class TestMain(unittest.TestCase):
                 {
                     "target": "192.168.1.1",
                     "port": 80,
+                    "protocol": "tcp",
                     "service": "HTTP",
                     "status": "OPEN"
                  }
@@ -44,6 +45,7 @@ class TestMain(unittest.TestCase):
                 {
                     "target": "192.168.1.2",
                     "port": 443,
+                    "protocol": "tcp",
                     "service": "HTTPS",
                     "status": "OPEN"
                 }
@@ -107,6 +109,7 @@ class TestMain(unittest.TestCase):
                 {
                     "target": "192.168.1.1",
                     "port": 80,
+                    "protocol": "tcp",
                     "service": "HTTP",
                     "status": "OPEN",
                 }
@@ -115,6 +118,7 @@ class TestMain(unittest.TestCase):
                 {
                     "target": "192.168.1.2",
                     "port": 443,
+                    "protocol": "tcp",
                     "service": "HTTPS",
                     "status": "OPEN",
                 }
@@ -128,12 +132,14 @@ class TestMain(unittest.TestCase):
                 {
                     "target": "192.168.1.1",
                     "port": 80,
+                    "protocol": "tcp",
                     "service": "HTTP",
                     "status": "OPEN",
                 },
                 {
                     "target": "192.168.1.2",
                     "port": 443,
+                    "protocol": "tcp",
                     "service": "HTTPS",
                     "status": "OPEN",
                 },

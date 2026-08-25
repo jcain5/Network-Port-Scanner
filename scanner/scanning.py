@@ -29,6 +29,7 @@ def scan_host(target: str, services: dict[int, str], timeout: float = 1.0, proto
             "timestamp": scan_time,
             "target": target,
             "port": port,
+            "protocol": protocol,
             "service": service,
             "status": status,
         })

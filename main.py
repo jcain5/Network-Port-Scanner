@@ -167,7 +167,7 @@ def main() -> None:
         print(
             f"[{result['status']}] "
             f"{result['target']}: "
-            f"{result['port']} "
+            f"{result['port']}/{result['protocol'].upper()}"
             f"({result['service']}) "
         )
 
